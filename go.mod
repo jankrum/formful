@@ -5,7 +5,6 @@ go 1.26.1
 require (
 	github.com/a-h/templ v0.3.1020
 	github.com/go-chi/chi/v5 v5.2.5
-	github.com/go-chi/cors v1.2.2
 	github.com/jackc/pgx/v5 v5.9.2
 	github.com/joho/godotenv v1.5.1
 	github.com/testcontainers/testcontainers-go v0.42.0

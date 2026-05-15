@@ -85,7 +85,7 @@ docker-down:
 	fi
 
 spell:
-	pnpx cspell "**"
+	pnpx cspell "**" ".air.toml"
 
 # ── test ──────────────────────────────────────────────────────────────────────
 
