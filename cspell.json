@@ -8,7 +8,12 @@
     "**/*_templ.go"
   ],
   "words": [
+    "BYTEA",
     "bulma",
+    "DBTX",
+    "pgconn",
+    "pgtype",
+    "pgxpool",
     "fullheight",
     "healthcheck",
     "isready",
@@ -43,6 +48,7 @@
     "stdlib",
     "stretchr",
     "templ",
+    "TIMESTAMPTZ",
     "testdata",
     "tklauser",
     "tmpl",

@@ -2,10 +2,15 @@ package database
 
 import (
 	"context"
+	"database/sql"
+	"fmt"
 	"log"
 	"testing"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgxpool"
+	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/pressly/goose/v3"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
@@ -53,11 +58,34 @@ func mustStartPostgresContainer() (func(context.Context, ...testcontainers.Termi
 	return dbContainer.Terminate, err
 }
 
+func testConnStr() string {
+	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", username, password, host, port, database)
+}
+
+func testQueries(t *testing.T) *Queries {
+	t.Helper()
+	pool, err := pgxpool.New(context.Background(), testConnStr())
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { pool.Close() })
+	return New(pool)
+}
+
 func TestMain(m *testing.M) {
 	teardown, err := mustStartPostgresContainer()
 	if err != nil {
 		log.Fatalf("could not start postgres container: %v", err)
 	}
+
+	sqlDB, err := sql.Open("pgx", testConnStr())
+	if err != nil {
+		log.Fatalf("could not open db for migrations: %v", err)
+	}
+	if err := goose.Up(sqlDB, "../../migrations"); err != nil {
+		log.Fatalf("could not run migrations: %v", err)
+	}
+	sqlDB.Close()
 
 	m.Run()
 
@@ -66,15 +94,15 @@ func TestMain(m *testing.M) {
 	}
 }
 
-func TestNew(t *testing.T) {
-	srv := New()
+func TestNewService(t *testing.T) {
+	srv := NewService()
 	if srv == nil {
-		t.Fatal("New() returned nil")
+		t.Fatal("NewService() returned nil")
 	}
 }
 
 func TestHealth(t *testing.T) {
-	srv := New()
+	srv := NewService()
 
 	stats := srv.Health()
 
@@ -92,9 +120,6 @@ func TestHealth(t *testing.T) {
 }
 
 func TestClose(t *testing.T) {
-	srv := New()
-
-	if srv.Close() != nil {
-		t.Fatalf("expected Close() to return nil")
-	}
+	srv := NewService()
+	srv.Close()
 }

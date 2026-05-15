@@ -2,25 +2,24 @@ package database
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"log"
 	"os"
 	"strconv"
 	"time"
 
-	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/joho/godotenv/autoload"
 )
 
 type Service interface {
 	Health() map[string]string
-	Close() error
-	DB() *sql.DB
+	Close()
+	Pool() *pgxpool.Pool
 }
 
 type service struct {
-	db *sql.DB
+	pool *pgxpool.Pool
 }
 
 var (
@@ -33,21 +32,21 @@ var (
 	dbInstance *service
 )
 
-func New() Service {
+func NewService() Service {
 	if dbInstance != nil {
 		return dbInstance
 	}
 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&search_path=%s", username, password, host, port, database, schema)
-	db, err := sql.Open("pgx", connStr)
+	pool, err := pgxpool.New(context.Background(), connStr)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dbInstance = &service{db: db}
+	dbInstance = &service{pool: pool}
 	return dbInstance
 }
 
-func (s *service) DB() *sql.DB {
-	return s.db
+func (s *service) Pool() *pgxpool.Pool {
+	return s.pool
 }
 
 func (s *service) Health() map[string]string {
@@ -56,7 +55,7 @@ func (s *service) Health() map[string]string {
 
 	stats := make(map[string]string)
 
-	err := s.db.PingContext(ctx)
+	err := s.pool.Ping(ctx)
 	if err != nil {
 		stats["status"] = "down"
 		stats["error"] = fmt.Sprintf("db down: %v", err)
@@ -67,32 +66,15 @@ func (s *service) Health() map[string]string {
 	stats["status"] = "up"
 	stats["message"] = "It's healthy"
 
-	dbStats := s.db.Stats()
-	stats["open_connections"] = strconv.Itoa(dbStats.OpenConnections)
-	stats["in_use"] = strconv.Itoa(dbStats.InUse)
-	stats["idle"] = strconv.Itoa(dbStats.Idle)
-	stats["wait_count"] = strconv.FormatInt(dbStats.WaitCount, 10)
-	stats["wait_duration"] = dbStats.WaitDuration.String()
-	stats["max_idle_closed"] = strconv.FormatInt(dbStats.MaxIdleClosed, 10)
-	stats["max_lifetime_closed"] = strconv.FormatInt(dbStats.MaxLifetimeClosed, 10)
-
-	if dbStats.OpenConnections > 40 {
-		stats["message"] = "The database is experiencing heavy load."
-	}
-	if dbStats.WaitCount > 1000 {
-		stats["message"] = "The database has a high number of wait events, indicating potential bottlenecks."
-	}
-	if dbStats.MaxIdleClosed > int64(dbStats.OpenConnections)/2 {
-		stats["message"] = "Many idle connections are being closed, consider revising the connection pool settings."
-	}
-	if dbStats.MaxLifetimeClosed > int64(dbStats.OpenConnections)/2 {
-		stats["message"] = "Many connections are being closed due to max lifetime, consider increasing max lifetime or revising the connection usage pattern."
-	}
+	poolStats := s.pool.Stat()
+	stats["total_conns"] = strconv.Itoa(int(poolStats.TotalConns()))
+	stats["idle_conns"] = strconv.Itoa(int(poolStats.IdleConns()))
+	stats["acquired_conns"] = strconv.Itoa(int(poolStats.AcquiredConns()))
 
 	return stats
 }
 
-func (s *service) Close() error {
+func (s *service) Close() {
 	log.Printf("Disconnected from database: %s", database)
-	return s.db.Close()
+	s.pool.Close()
 }
