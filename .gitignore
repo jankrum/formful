@@ -19,7 +19,8 @@ go.work
 tmp/
 
 # IDE specific files
-.vscode
+.vscode/*
+!.vscode/extensions.json
 .idea
 
 # .env file

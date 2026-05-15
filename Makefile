@@ -84,6 +84,9 @@ docker-down:
 		docker-compose down; \
 	fi
 
+spell:
+	pnpx cspell "**"
+
 # ── test ──────────────────────────────────────────────────────────────────────
 
 test:
@@ -119,4 +122,4 @@ clean:
 
 .PHONY: all build build-all run test clean watch docker-run docker-down itest \
 	templ-install sqlc-install goose-install vendor-assets css sqlc-gen \
-	migrate-up migrate-down
+	migrate-up migrate-down spell
