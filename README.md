@@ -33,3 +33,4 @@ Generate secrets with `openssl rand -hex 32`.
 | `make clean`         | Remove binary and vendored assets                                      |
 | `make docker-run`    | Build and start all services via docker compose                        |
 | `make docker-down`   | Stop docker compose services                                           |
+| `make spell`         | Spell-check all files via cspell                                       |

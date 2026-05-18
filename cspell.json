@@ -10,11 +10,14 @@
   "words": [
     "BYTEA",
     "bulma",
+    "chimiddleware",
+    "ciphertext",
     "DBTX",
     "pgconn",
     "pgtype",
     "pgxpool",
     "fullheight",
+    "fullwidth",
     "healthcheck",
     "isready",
     "RPID",
@@ -28,6 +31,7 @@
     "githubaction",
     "htmx",
     "HTMX",
+    "internalauth",
     "itest",
     "jackc",
     "jankrum",
@@ -52,6 +56,14 @@
     "testdata",
     "tklauser",
     "tmpl",
+    "nowrap",
+    "qtype",
+    "autofocus",
+    "dpage",
+    "novalidate",
+    "pgadmin",
+    "PGADMIN",
+    "webauth",
     "webauthn"
   ]
 }
