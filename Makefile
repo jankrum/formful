@@ -1,3 +1,8 @@
+include .env
+export
+
+DB_URL=postgres://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=disable
+
 all: build test
 
 # ── tools ─────────────────────────────────────────────────────────────────────
@@ -35,24 +40,25 @@ goose-install:
 # ── client assets ─────────────────────────────────────────────────────────────
 
 vendor-assets:
-	@mkdir -p cmd/web/assets/js cmd/web/assets/css
-	curl -sLo cmd/web/assets/js/htmx.min.js https://unpkg.com/htmx.org/dist/htmx.min.js
-	curl -sLo cmd/web/assets/js/surreal.js https://cdn.jsdelivr.net/gh/gnat/surreal/surreal.js
+	@mkdir -p cmd/web/assets/js/vendor cmd/web/assets/css
+	curl -sLo cmd/web/assets/js/vendor/htmx.min.js https://unpkg.com/htmx.org/dist/htmx.min.js
+	curl -sLo cmd/web/assets/js/vendor/surreal.js https://cdn.jsdelivr.net/gh/gnat/surreal/surreal.js
 	curl -sLo cmd/web/assets/css/style.css https://cdn.jsdelivr.net/npm/@jankrum/style.css/dist/style.css
 
 css:
-	npx --yes purgecss \
-		--css cmd/web/assets/css/style.css \
-		--content "cmd/web/**/*.templ" "cmd/web/**/*.go" \
+	node scripts/preprocess-css.js cmd/web/assets/css/style.css /tmp/formful-style.css
+	pnpx purgecss \
+		--css /tmp/formful-style.css \
+		--content "cmd/web/**/*.templ" "cmd/web/**/*.go" "cmd/web/**/*.js" \
 		--output cmd/web/assets/css/app.css
 
 # ── database ──────────────────────────────────────────────────────────────────
 
 migrate-up: goose-install
-	goose -dir migrations postgres "$(DATABASE_URL)" up
+	goose -dir migrations postgres "$(DB_URL)" up
 
 migrate-down: goose-install
-	goose -dir migrations postgres "$(DATABASE_URL)" down
+	goose -dir migrations postgres "$(DB_URL)" down
 
 sqlc-gen: sqlc-install
 	sqlc generate
@@ -115,8 +121,8 @@ watch:
 clean:
 	@echo "Cleaning..."
 	@rm -f main
-	@rm -f cmd/web/assets/js/htmx.min.js
-	@rm -f cmd/web/assets/js/surreal.js
+	@rm -f cmd/web/assets/js/vendor/htmx.min.js
+	@rm -f cmd/web/assets/js/vendor/surreal.js
 	@rm -f cmd/web/assets/css/style.css
 	@rm -f cmd/web/assets/css/app.css
 

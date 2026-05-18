@@ -34,8 +34,8 @@ main
 .DS_Store
 
 # Vendored client assets (fetched via make vendor-assets)
-cmd/web/assets/js/htmx.min.js
-cmd/web/assets/js/surreal.js
+cmd/web/assets/js/vendor/htmx.min.js
+cmd/web/assets/js/vendor/surreal.js
 cmd/web/assets/css/style.css
 cmd/web/assets/css/app.css
 
