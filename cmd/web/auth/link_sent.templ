@@ -1,0 +1,25 @@
+package auth
+
+import "github.com/jankrum/formful/cmd/web"
+
+templ linkSentPage() {
+	@web.Base("Link sent") {
+		@web.Nav()
+		<section class="section is-flex is-align-items-center">
+			<div class="container">
+				<div class="columns is-centered">
+					<div class="column is-4">
+						<div class="box has-text-centered p-6">
+							<h1 class="title mb-5">Link sent</h1>
+							<p class="subtitle is-6">Check your email for a sign-in link.<br/>It'll only work once.</p>
+						</div>
+						<p class="has-text-muted is-size-7 has-text-centered mt-4">
+							Wrong email? <a href="/login">Start over.</a>
+						</p>
+					</div>
+				</div>
+			</div>
+		</section>
+		@web.Footer()
+	}
+}

@@ -10,12 +10,14 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 
 	"github.com/jankrum/formful/internal/database"
+	"github.com/jankrum/formful/internal/email"
 )
 
 type Server struct {
 	port    int
 	db      database.Service
 	queries *database.Queries
+	mailer  email.Sender
 }
 
 func NewServer() *http.Server {
@@ -23,11 +25,13 @@ func NewServer() *http.Server {
 
 	db := database.NewService()
 	queries := database.New(db.Pool())
+	mailer := email.NewResendSender()
 
 	s := &Server{
 		port:    port,
 		db:      db,
 		queries: queries,
+		mailer:  mailer,
 	}
 
 	return &http.Server{

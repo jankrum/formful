@@ -1,0 +1,22 @@
+package web
+
+import "github.com/jankrum/formful/internal/middleware"
+
+templ Nav() {
+	<nav
+		class="navbar px-2 is-flex is-justify-content-space-between is-align-items-center is-flex-wrap-nowrap"
+		aria-label="Main navigation"
+	>
+		<div class="navbar-brand">
+			<a class="navbar-item title mb-0" href="/">Formful</a>
+		</div>
+		<div class="is-flex is-align-items-center">
+			if session := middleware.GetSession(ctx); session != nil {
+				<span>{ session.Email }</span>
+			}
+			<form action="/logout" method="post">
+				<button class="button ml-2" type="submit">Sign Out</button>
+			</form>
+		</div>
+	</nav>
+}

@@ -1,0 +1,66 @@
+package auth
+
+import "github.com/jankrum/formful/cmd/web"
+
+templ loginPage() {
+	@web.Base("Sign In") {
+		<nav class="navbar is-flex is-justify-content-space-between is-align-items-center" aria-label="Main navigation">
+			<div class="navbar-brand">
+				<a class="navbar-item title mb-0" href="/">Formful</a>
+			</div>
+			<div class="navbar-item">
+				<button id="theme-switch-button" class="button" aria-label="Toggle theme"></button>
+			</div>
+		</nav>
+		<section class="section is-flex is-align-items-center">
+			<div class="container is-max-desktop">
+				<div class="columns is-centered">
+					<div class="column is-6">
+						<div class="box pb-4">
+							<h1 class="title has-text-centered mb-3">Sign In</h1>
+							<form method="POST" action="/login" novalidate>
+								<div class="field">
+									<label class="label" for="email">Email</label>
+									<div class="field has-addons">
+										<div class="control is-expanded">
+											<input
+												class="input"
+												type="email"
+												id="email"
+												name="email"
+												required
+												autocomplete="email"
+												autofocus
+												placeholder="you@example.com"
+											/>
+										</div>
+										<div class="control">
+											<button class="button" type="submit">Send Link</button>
+										</div>
+									</div>
+									<p class="help is-danger has-text-centered is-hidden" id="email-error">Invalid email</p>
+								</div>
+							</form>
+							<div class="is-flex is-align-items-center mt-4">
+								<hr class="is-flex-grow-1 my-0"/>
+								<span class="is-size-8 has-text-muted mx-3">or</span>
+								<hr class="is-flex-grow-1 my-0"/>
+							</div>
+							<div class="field mt-4 is-flex is-justify-content-center">
+								<div class="control">
+									<button class="button" type="button" id="passkey-signin">Use Passkey</button>
+								</div>
+							</div>
+							<p class="help has-text-centered is-hidden" id="passkey-cancel">Cancelled.</p>
+							<p class="help is-danger has-text-centered is-hidden" id="passkey-error">
+								Couldn't verify. Try again or use email.
+							</p>
+						</div>
+						<p class="has-text-muted is-size-7 has-text-centered mt-4">We won't share your email.</p>
+					</div>
+				</div>
+			</div>
+		</section>
+		@web.Footer()
+	}
+}

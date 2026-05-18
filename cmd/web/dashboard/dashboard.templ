@@ -1,0 +1,18 @@
+package dashboard
+
+import "github.com/jankrum/formful/cmd/web"
+
+templ dashboardPage() {
+	@web.Base("Dashboard") {
+		@web.Nav()
+		<section class="section">
+			<div class="container">
+				<div class="is-flex is-align-items-center mb-5">
+					<h1 class="title mb-0">Created Forms</h1>
+					<a class="button ml-4" href="/forms/new">New Form</a>
+				</div>
+			</div>
+		</section>
+		@web.Footer()
+	}
+}
