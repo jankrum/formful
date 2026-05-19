@@ -7,14 +7,7 @@ import (
 
 templ loginPage() {
 	@web.Base("Sign In") {
-		<nav class="navbar is-flex is-justify-content-space-between is-align-items-center" aria-label="Main navigation">
-			<div class="navbar-brand">
-				<a class="navbar-item title mb-0" href="/">Formful</a>
-			</div>
-			<div class="navbar-item">
-				<button id="theme-switch-button" class="button" aria-label="Toggle theme"></button>
-			</div>
-		</nav>
+		@web.Nav()
 		<section class="section is-flex is-align-items-center">
 			<div class="container is-max-desktop">
 				<div class="columns is-centered">

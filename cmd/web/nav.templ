@@ -12,11 +12,15 @@ templ Nav() {
 		</div>
 		<div class="is-flex is-align-items-center">
 			if session := middleware.GetSession(ctx); session != nil {
-				<span>{ session.Email }</span>
+				<a class="button" href="/account">Account</a>
+				<form action="/logout" method="post">
+					<button class="button ml-2" type="submit">Sign Out</button>
+				</form>
+			} else {
+				<div class="navbar-item">
+					<button id="theme-switch-button" class="button" aria-label="Toggle theme"></button>
+				</div>
 			}
-			<form action="/logout" method="post">
-				<button class="button ml-2" type="submit">Sign Out</button>
-			</form>
 		</div>
 	</nav>
 }
