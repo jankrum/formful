@@ -41,29 +41,9 @@ func (h *Handler) PostLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.queries.UpsertUser(r.Context(), emailAddr)
-	if err != nil {
-		slog.Error("upsert user", "err", err)
-		flash.Set(w, "Something went wrong. Please try again.")
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-
 	token, err := internalauth.GenerateToken()
 	if err != nil {
 		slog.Error("generate token", "err", err)
-		flash.Set(w, "Something went wrong. Please try again.")
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-
-	_, err = h.queries.CreateMagicLink(r.Context(), database.CreateMagicLinkParams{
-		UserID:    user.ID,
-		Token:     token,
-		ExpiresAt: pgtype.Timestamptz{Time: time.Now().Add(15 * time.Minute), Valid: true},
-	})
-	if err != nil {
-		slog.Error("create magic link", "err", err)
 		flash.Set(w, "Something went wrong. Please try again.")
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
@@ -79,6 +59,26 @@ func (h *Handler) PostLogin(w http.ResponseWriter, r *http.Request) {
 		slog.Error("send magic link", "err", err)
 		flash.SetEmailError(w, "Failed to send email. Please try again.")
 		flash.SetEmailValue(w, emailAddr)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	user, err := h.queries.UpsertUser(r.Context(), emailAddr)
+	if err != nil {
+		slog.Error("upsert user", "err", err)
+		flash.Set(w, "Something went wrong. Please try again.")
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	_, err = h.queries.CreateMagicLink(r.Context(), database.CreateMagicLinkParams{
+		UserID:    user.ID,
+		Token:     token,
+		ExpiresAt: pgtype.Timestamptz{Time: time.Now().Add(15 * time.Minute), Valid: true},
+	})
+	if err != nil {
+		slog.Error("create magic link", "err", err)
+		flash.Set(w, "Something went wrong. Please try again.")
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
