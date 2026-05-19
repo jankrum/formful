@@ -90,6 +90,12 @@ docker-down:
 		docker-compose down; \
 	fi
 
+db-up:
+	docker compose up postgres pgadmin -d
+
+db-down:
+	docker compose stop postgres pgadmin
+
 spell:
 	pnpx cspell "**" ".air.toml"
 
@@ -126,6 +132,6 @@ clean:
 	@rm -f cmd/web/assets/css/style.css
 	@rm -f cmd/web/assets/css/app.css
 
-.PHONY: all build build-all run test clean watch docker-run docker-down itest \
+.PHONY: all build build-all run test clean watch docker-run docker-down db-up db-down itest \
 	templ-install sqlc-install goose-install vendor-assets css sqlc-gen \
 	migrate-up migrate-down spell
