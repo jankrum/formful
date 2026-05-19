@@ -24,7 +24,12 @@ func NewHandler(queries *database.Queries, mailer email.Sender) *Handler {
 }
 
 func (h *Handler) LoginPage(w http.ResponseWriter, r *http.Request) {
-	loginPage().Render(r.Context(), w)
+	ctx := r.Context()
+	// ?expired=1 comes from VerifyMagicLink — flash cookie unreliable on cross-site redirects
+	if flash.GetEmailError(ctx) == "" && r.URL.Query().Get("expired") == "1" {
+		ctx = flash.WithEmailError(ctx, "Invalid or expired login link.")
+	}
+	loginPage().Render(ctx, w)
 }
 
 func (h *Handler) PostLogin(w http.ResponseWriter, r *http.Request) {
@@ -94,8 +99,7 @@ func (h *Handler) VerifyMagicLink(w http.ResponseWriter, r *http.Request) {
 
 	magicLink, err := h.queries.GetMagicLinkByToken(r.Context(), token)
 	if err != nil {
-		flash.Set(w, "Invalid or expired login link.")
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		http.Redirect(w, r, "/login?expired=1", http.StatusSeeOther)
 		return
 	}
 

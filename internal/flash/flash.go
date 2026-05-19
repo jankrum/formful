@@ -27,6 +27,10 @@ func GetEmailError(ctx context.Context) string {
 	return v
 }
 
+func WithEmailError(ctx context.Context, message string) context.Context {
+	return context.WithValue(ctx, emailErrorKey{}, message)
+}
+
 func GetEmailValue(ctx context.Context) string {
 	v, _ := ctx.Value(emailValueKey{}).(string)
 	return v
@@ -42,7 +46,7 @@ func SetEmailValue(w http.ResponseWriter, value string) {
 		Value:    encrypted,
 		Path:     "/",
 		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode,
+		SameSite: http.SameSiteLaxMode,
 		MaxAge:   60,
 	})
 }
@@ -57,7 +61,7 @@ func SetEmailError(w http.ResponseWriter, message string) {
 		Value:    encrypted,
 		Path:     "/",
 		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode,
+		SameSite: http.SameSiteLaxMode,
 		MaxAge:   60,
 	})
 }
@@ -72,7 +76,7 @@ func Set(w http.ResponseWriter, message string) {
 		Value:    encrypted,
 		Path:     "/",
 		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode,
+		SameSite: http.SameSiteLaxMode,
 		MaxAge:   60,
 	})
 }
