@@ -14,10 +14,52 @@ import (
 )
 
 type contextKey struct{}
+type emailErrorKey struct{}
+type emailValueKey struct{}
 
 func GetMessage(ctx context.Context) string {
 	v, _ := ctx.Value(contextKey{}).(string)
 	return v
+}
+
+func GetEmailError(ctx context.Context) string {
+	v, _ := ctx.Value(emailErrorKey{}).(string)
+	return v
+}
+
+func GetEmailValue(ctx context.Context) string {
+	v, _ := ctx.Value(emailValueKey{}).(string)
+	return v
+}
+
+func SetEmailValue(w http.ResponseWriter, value string) {
+	encrypted, err := encrypt(value)
+	if err != nil {
+		return
+	}
+	http.SetCookie(w, &http.Cookie{
+		Name:     "flash_email_value",
+		Value:    encrypted,
+		Path:     "/",
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+		MaxAge:   60,
+	})
+}
+
+func SetEmailError(w http.ResponseWriter, message string) {
+	encrypted, err := encrypt(message)
+	if err != nil {
+		return
+	}
+	http.SetCookie(w, &http.Cookie{
+		Name:     "flash_email",
+		Value:    encrypted,
+		Path:     "/",
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+		MaxAge:   60,
+	})
 }
 
 func Set(w http.ResponseWriter, message string) {
@@ -37,19 +79,26 @@ func Set(w http.ResponseWriter, message string) {
 
 func Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cookie, err := r.Cookie("flash")
-		if err == nil {
-			http.SetCookie(w, &http.Cookie{
-				Name:   "flash",
-				Value:  "",
-				Path:   "/",
-				MaxAge: -1,
-			})
+		ctx := r.Context()
+		if cookie, err := r.Cookie("flash"); err == nil {
+			http.SetCookie(w, &http.Cookie{Name: "flash", Value: "", Path: "/", MaxAge: -1})
 			if message, err := decrypt(cookie.Value); err == nil {
-				r = r.WithContext(context.WithValue(r.Context(), contextKey{}, message))
+				ctx = context.WithValue(ctx, contextKey{}, message)
 			}
 		}
-		next.ServeHTTP(w, r)
+		if cookie, err := r.Cookie("flash_email"); err == nil {
+			http.SetCookie(w, &http.Cookie{Name: "flash_email", Value: "", Path: "/", MaxAge: -1})
+			if message, err := decrypt(cookie.Value); err == nil {
+				ctx = context.WithValue(ctx, emailErrorKey{}, message)
+			}
+		}
+		if cookie, err := r.Cookie("flash_email_value"); err == nil {
+			http.SetCookie(w, &http.Cookie{Name: "flash_email_value", Value: "", Path: "/", MaxAge: -1})
+			if value, err := decrypt(cookie.Value); err == nil {
+				ctx = context.WithValue(ctx, emailValueKey{}, value)
+			}
+		}
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 

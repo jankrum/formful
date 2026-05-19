@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"net/mail"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -28,7 +29,9 @@ func (h *Handler) LoginPage(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) PostLogin(w http.ResponseWriter, r *http.Request) {
 	emailAddr := r.FormValue("email")
-	if emailAddr == "" {
+	if _, err := mail.ParseAddress(emailAddr); err != nil {
+		flash.SetEmailError(w, "Invalid email address.")
+		flash.SetEmailValue(w, emailAddr)
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
@@ -69,7 +72,8 @@ func (h *Handler) PostLogin(w http.ResponseWriter, r *http.Request) {
 
 	if err := h.mailer.SendMagicLink(emailAddr, verifyURL); err != nil {
 		slog.Error("send magic link", "err", err)
-		flash.Set(w, "Failed to send email. Please try again.")
+		flash.SetEmailError(w, "Failed to send email. Please try again.")
+		flash.SetEmailValue(w, emailAddr)
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}

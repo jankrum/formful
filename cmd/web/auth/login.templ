@@ -1,6 +1,9 @@
 package auth
 
-import "github.com/jankrum/formful/cmd/web"
+import (
+	"github.com/jankrum/formful/cmd/web"
+	"github.com/jankrum/formful/internal/flash"
+)
 
 templ loginPage() {
 	@web.Base("Sign In") {
@@ -24,7 +27,7 @@ templ loginPage() {
 									<div class="field has-addons">
 										<div class="control is-expanded">
 											<input
-												class="input"
+												class={ "input", templ.KV("is-danger", flash.GetEmailError(ctx) != "") }
 												type="email"
 												id="email"
 												name="email"
@@ -32,13 +35,14 @@ templ loginPage() {
 												autocomplete="email"
 												autofocus
 												placeholder="you@example.com"
+												value={ flash.GetEmailValue(ctx) }
 											/>
 										</div>
 										<div class="control">
 											<button class="button" type="submit">Send Link</button>
 										</div>
 									</div>
-									<p class="help is-danger has-text-centered is-hidden" id="email-error">Invalid email</p>
+									<p class={ "help", "is-danger", "has-text-centered", templ.KV("is-hidden", flash.GetEmailError(ctx) == "") } id="email-error">{ flash.GetEmailError(ctx) }</p>
 								</div>
 							</form>
 							<div class="is-flex is-align-items-center mt-4">
