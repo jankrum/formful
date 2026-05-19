@@ -39,7 +39,7 @@ func (s *resendSender) SendMagicLink(to, verifyURL string) error {
 		From:    s.from,
 		To:      []string{to},
 		Subject: "Your Formful login link",
-		HTML:    fmt.Sprintf(`<p><a href="%s">Click here to log in</a> (expires in 15 minutes)</p>`, verifyURL),
+		HTML:    fmt.Sprintf(`<p><a href="%s">Click here to log in to Formful</a> (expires in 15 minutes)</p>`, verifyURL),
 	}
 	data, err := json.Marshal(payload)
 	if err != nil {
