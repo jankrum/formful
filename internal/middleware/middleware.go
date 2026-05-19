@@ -30,8 +30,8 @@ func Nonce(next http.Handler) http.Handler {
 		nonce := base64.StdEncoding.EncodeToString(b)
 
 		csp := fmt.Sprintf(
-			"default-src 'self'; script-src 'nonce-%s'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'",
-			nonce,
+			"default-src 'self'; script-src 'nonce-%s'; style-src 'nonce-%s' 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'",
+			nonce, nonce,
 		)
 		w.Header().Set("Content-Security-Policy", csp)
 
